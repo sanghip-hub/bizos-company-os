@@ -3,9 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { KpiCard } from "@/components/kpi/KpiCard";
+import { KpiHeroDonut } from "@/components/kpi/KpiHeroDonut";
 import { DataTable, type Column } from "@/components/tables/DataTable";
+import { ProgressList } from "@/components/widgets/ProgressList";
+import { StatChip } from "@/components/widgets/StatChip";
 import { fetchRequisitions, fetchDepartments } from "@/lib/queries";
 import type { JobRequisition } from "@/types/domain";
+import { UserPlus, Users, Clock, Award } from "lucide-react";
 
 export default async function RecruitingPage() {
   const [requisitions, departments] = await Promise.all([
@@ -21,6 +25,22 @@ export default async function RecruitingPage() {
 
   const open = requisitions.filter((r) => r.status === "open").length;
   const totalHeadcount = requisitions.reduce((s, r) => s + r.headcount, 0);
+
+  const pipelineStages = [
+    { name: "Mới", value: 32, color: "#6366f1" },
+    { name: "Screening", value: 14, color: "#8b5cf6" },
+    { name: "Interview", value: 6, color: "#f59e0b" },
+    { name: "Offer", value: 2, color: "#10b981" },
+  ];
+  const pipelineTotal = pipelineStages.reduce((s, x) => s + x.value, 0);
+
+  const skillGaps = [
+    { skill: "Performance Marketing", current: 2, target: 4, dept: "Marketing" },
+    { skill: "Enterprise Sales", current: 3, target: 5, dept: "Sales" },
+    { skill: "Data Analytics", current: 1, target: 3, dept: "Operations" },
+    { skill: "Customer Success Ops", current: 2, target: 3, dept: "CS" },
+    { skill: "Finance analyst", current: 1, target: 2, dept: "Finance" },
+  ];
 
   const columns: Column<Row>[] = [
     { key: "title", header: "Vị trí", render: (r) => <span className="font-medium">{r.title}</span> },
@@ -41,13 +61,6 @@ export default async function RecruitingPage() {
     },
   ];
 
-  const skillGaps = [
-    { skill: "Performance Marketing", current: 2, target: 4, dept: "Marketing" },
-    { skill: "Enterprise Sales", current: 3, target: 5, dept: "Sales" },
-    { skill: "Data Analytics", current: 1, target: 3, dept: "Operations" },
-    { skill: "Customer Success Ops", current: 2, target: 3, dept: "CS" },
-  ];
-
   return (
     <div>
       <PageHeader
@@ -56,55 +69,79 @@ export default async function RecruitingPage() {
         actions={<Button>+ Yêu cầu tuyển dụng</Button>}
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="Vị trí đang mở" value={String(open)} accent="indigo" />
-        <KpiCard label="Headcount cần tuyển" value={String(totalHeadcount)} accent="violet" />
-        <KpiCard label="Skill gap" value={String(skillGaps.length)} accent="amber" />
-        <KpiCard label="Time-to-hire TB" value="38 ngày" accent="red" />
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 mb-6">
+        <KpiCard label="Vị trí mở" value={String(open)} accent="indigo" icon={<UserPlus className="h-3.5 w-3.5" />} />
+        <KpiCard label="Headcount cần" value={String(totalHeadcount)} accent="violet" icon={<Users className="h-3.5 w-3.5" />} />
+        <KpiCard label="Candidates" value={String(pipelineTotal)} accent="emerald" spark={[40, 42, 48, 50, 52, pipelineTotal]} />
+        <KpiCard label="Time-to-hire TB" value="38 ngày" accent="amber" icon={<Clock className="h-3.5 w-3.5" />} spark={[45, 42, 40, 38, 38, 38]} delta={-15} />
+        <KpiCard label="Skill gap" value={String(skillGaps.length)} accent="red" icon={<Award className="h-3.5 w-3.5" />} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Job requisitions</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
+        <Card className="lg:col-span-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Pipeline ứng viên</CardTitle>
           </CardHeader>
           <CardContent>
-            <DataTable columns={columns} rows={rows} />
+            <KpiHeroDonut
+              value={pipelineTotal}
+              label="Candidates"
+              height={200}
+              segments={pipelineStages.map((s) => ({ ...s, value: (s.value / pipelineTotal) * 100 }))}
+            />
+            <div className="mt-3 space-y-1 text-xs">
+              {pipelineStages.map((s) => (
+                <div key={s.name} className="flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full" style={{ background: s.color }} />
+                    {s.name}
+                  </span>
+                  <span className="font-medium">{s.value}</span>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Skill gap</CardTitle>
+        <Card className="lg:col-span-5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Skill gap</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {skillGaps.map((g) => {
-              const pct = Math.round((g.current / g.target) * 100);
-              return (
-                <div key={g.skill}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div>
-                      <div className="text-sm font-medium text-zinc-900">{g.skill}</div>
-                      <div className="text-xs text-zinc-500">{g.dept}</div>
-                    </div>
-                    <span className="text-xs text-zinc-500">
-                      {g.current}/{g.target}
-                    </span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-zinc-100">
-                    <div
-                      className={`h-1.5 rounded-full ${
-                        pct >= 80 ? "bg-emerald-500" : pct >= 50 ? "bg-amber-500" : "bg-red-500"
-                      }`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+          <CardContent>
+            <ProgressList
+              rows={skillGaps.map((g) => ({
+                label: `${g.skill} (${g.dept})`,
+                value: g.current,
+                max: g.target,
+                right: `${g.current}/${g.target}`,
+                color: g.current >= g.target ? "#10b981" : g.current / g.target >= 0.6 ? "#f59e0b" : "#ef4444",
+              }))}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-3">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Nguồn ứng viên</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <StatChip label="Referral" value="38%" tone="success" />
+            <StatChip label="LinkedIn" value="24%" tone="info" />
+            <StatChip label="Website" value="20%" tone="violet" />
+            <StatChip label="Other" value="18%" tone="default" />
+            <div className="text-xs text-zinc-500 mt-2">Referral luôn chất lượng nhất — push bonus giới thiệu.</div>
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Job requisitions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable columns={columns} rows={rows} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { KpiCard } from "@/components/kpi/KpiCard";
+import { KpiHeroDonut } from "@/components/kpi/KpiHeroDonut";
+import { StatChip } from "@/components/widgets/StatChip";
 import { fetchAlerts } from "@/lib/queries";
-import { AlertTriangle, AlertCircle, Info, AlertOctagon } from "lucide-react";
+import { AlertTriangle, AlertCircle, Info, AlertOctagon, BellRing, Clock, Shield } from "lucide-react";
 
 const iconBy = {
   critical: AlertOctagon,
@@ -21,24 +23,94 @@ export default async function AlertsPage() {
   const warning = alerts.filter((a) => a.severity === "warning").length;
   const info = alerts.filter((a) => a.severity === "info").length;
 
+  const segments = [
+    { name: "Critical", value: critical, color: "#dc2626" },
+    { name: "Danger", value: danger, color: "#ef4444" },
+    { name: "Warning", value: warning, color: "#f59e0b" },
+    { name: "Info", value: info, color: "#6366f1" },
+  ];
+  const total = segments.reduce((s, x) => s + x.value, 0) || 1;
+
   return (
     <div>
       <PageHeader
         title="Alerts Center"
-        description="Tập trung mọi cảnh báo từ KPI, task, chi phí, cash flow, workload"
-        actions={<Button variant="outline">Cài đặt rule cảnh báo</Button>}
+        description="KPI · Task · Cash flow · Workload · Compliance"
+        actions={<Button variant="outline">Cấu hình rule</Button>}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <KpiCard label="Critical" value={String(critical)} accent="red" />
-        <KpiCard label="Danger" value={String(danger)} accent="red" />
-        <KpiCard label="Warning" value={String(warning)} accent="amber" />
-        <KpiCard label="Info" value={String(info)} accent="indigo" />
+        <KpiCard label="Critical" value={String(critical)} accent="red" icon={<AlertOctagon className="h-3.5 w-3.5" />} />
+        <KpiCard label="Danger" value={String(danger)} accent="red" icon={<AlertTriangle className="h-3.5 w-3.5" />} />
+        <KpiCard label="Warning" value={String(warning)} accent="amber" icon={<AlertCircle className="h-3.5 w-3.5" />} />
+        <KpiCard label="Info" value={String(info)} accent="indigo" icon={<Info className="h-3.5 w-3.5" />} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
+        <Card className="lg:col-span-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Phân bổ mức độ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <KpiHeroDonut
+              value={total}
+              label="Tổng cảnh báo mở"
+              height={200}
+              segments={segments.map((s) => ({ ...s, value: (s.value / total) * 100 }))}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Theo nhóm nguyên nhân</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <StatChip label="KPI threshold" value={2} tone="danger" />
+            <StatChip label="Task overdue / SLA" value={1} tone="warning" />
+            <StatChip label="Workload overload" value={1} tone="warning" />
+            <StatChip label="Cash flow / Runway" value={1} tone="info" />
+            <StatChip label="Compliance" value={0} tone="success" />
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Shield className="h-4 w-4 text-indigo-600" />
+              Rule đang hoạt động
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {[
+              { name: "KPI < 85% threshold", tone: "info" as const, count: "live" },
+              { name: "Task overdue > 2 ngày", tone: "warning" as const, count: "live" },
+              { name: "Chi phí vượt 5% budget", tone: "warning" as const, count: "live" },
+              { name: "Nhân sự > 10 task", tone: "danger" as const, count: "live" },
+              { name: "Cash < 10 tháng runway", tone: "info" as const, count: "live" },
+            ].map((r) => (
+              <div
+                key={r.name}
+                className="flex items-center justify-between rounded-lg border border-zinc-100 p-2.5"
+              >
+                <span className="text-zinc-700">{r.name}</span>
+                <Badge variant={r.tone}>{r.count}</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Cảnh báo đang mở ({alerts.length})</CardTitle>
+        <CardHeader className="flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <BellRing className="h-4 w-4 text-indigo-600" />
+            Cảnh báo đang mở ({alerts.length})
+          </CardTitle>
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500">
+            <Clock className="h-3.5 w-3.5" />
+            Cập nhật liên tục
+          </div>
         </CardHeader>
         <CardContent className="space-y-2">
           {alerts.map((a) => {
@@ -83,8 +155,9 @@ export default async function AlertsPage() {
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <Button size="sm" variant="outline">
-                    Resolve
+                    Ẩn
                   </Button>
+                  <Button size="sm">Resolve</Button>
                 </div>
               </div>
             );

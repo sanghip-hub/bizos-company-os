@@ -2,7 +2,10 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, FileCheck, Shield } from "lucide-react";
+import { KpiCard } from "@/components/kpi/KpiCard";
+import { StatChip } from "@/components/widgets/StatChip";
+import { ProgressList } from "@/components/widgets/ProgressList";
+import { BookOpen, FileCheck, Shield, CheckSquare, FileText } from "lucide-react";
 import { fetchSops, fetchDepartments } from "@/lib/queries";
 
 export default async function KnowledgePage() {
@@ -13,84 +16,129 @@ export default async function KnowledgePage() {
     docs: sops.filter((s) => s.department_id === d.id),
   }));
 
+  const published = sops.filter((s) => s.published).length;
+  const avgVersion = sops.length
+    ? (sops.reduce((s, d) => s + d.version, 0) / sops.length).toFixed(1)
+    : "0";
+
   return (
     <div>
       <PageHeader
         title="SOP / Playbook"
-        description="Standard Operating Procedure · Checklist · Policy"
+        description="Standard Operating Procedure · Playbook · Checklist · Policy"
         actions={<Button>+ Thêm tài liệu</Button>}
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <Card className="p-4 flex items-center gap-3">
-          <BookOpen className="h-8 w-8 text-indigo-600" />
-          <div>
-            <div className="text-xs text-zinc-500">SOP</div>
-            <div className="text-2xl font-bold">{sops.length}</div>
-          </div>
-        </Card>
-        <Card className="p-4 flex items-center gap-3">
-          <FileCheck className="h-8 w-8 text-emerald-600" />
-          <div>
-            <div className="text-xs text-zinc-500">Published</div>
-            <div className="text-2xl font-bold">{sops.filter((s) => s.published).length}</div>
-          </div>
-        </Card>
-        <Card className="p-4 flex items-center gap-3">
-          <Shield className="h-8 w-8 text-amber-600" />
-          <div>
-            <div className="text-xs text-zinc-500">Version TB</div>
-            <div className="text-2xl font-bold">
-              {(sops.reduce((s, d) => s + d.version, 0) / Math.max(1, sops.length)).toFixed(1)}
-            </div>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="text-xs text-zinc-500">Phòng ban có SOP</div>
-          <div className="text-2xl font-bold">
-            {byDept.filter((b) => b.docs.length > 0).length}/{departments.length}
-          </div>
-        </Card>
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 mb-6">
+        <KpiCard label="Tổng SOP" value={String(sops.length)} accent="indigo" icon={<BookOpen className="h-3.5 w-3.5" />} />
+        <KpiCard label="Published" value={String(published)} accent="emerald" icon={<FileCheck className="h-3.5 w-3.5" />} />
+        <KpiCard label="Phòng ban có SOP" value={`${byDept.filter((b) => b.docs.length > 0).length}/${departments.length}`} accent="violet" />
+        <KpiCard label="Version TB" value={avgVersion} accent="amber" icon={<Shield className="h-3.5 w-3.5" />} />
+        <KpiCard label="Checklist" value="12" accent="cyan" icon={<CheckSquare className="h-3.5 w-3.5" />} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {byDept.map(({ dept, docs }) => (
-          <Card key={dept.id}>
-            <CardHeader>
-              <CardTitle className="text-base">{dept.name}</CardTitle>
-              <div className="text-xs text-zinc-500">
-                {docs.length} tài liệu
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {docs.map((d) => (
-                <div
-                  key={d.id}
-                  className="flex items-start gap-2 rounded-lg border border-zinc-100 p-2"
-                >
-                  <BookOpen className="h-4 w-4 text-indigo-600 mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm text-zinc-900">{d.title}</div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline">v{d.version}</Badge>
-                      {d.published ? (
-                        <Badge variant="success">Published</Badge>
-                      ) : (
-                        <Badge variant="warning">Draft</Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-6">
+        <Card className="lg:col-span-8">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">SOP theo phòng ban</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {byDept.map(({ dept, docs }) => (
+                <Card key={dept.id} className="border-zinc-200">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">{dept.name}</CardTitle>
+                    <div className="text-xs text-zinc-500">{docs.length} tài liệu</div>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {docs.map((d) => (
+                      <div
+                        key={d.id}
+                        className="flex items-start gap-2 rounded-lg border border-zinc-100 p-2"
+                      >
+                        <FileText className="h-4 w-4 text-indigo-600 mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-zinc-900 truncate">{d.title}</div>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <Badge variant="outline">v{d.version}</Badge>
+                            {d.published ? (
+                              <Badge variant="success">Published</Badge>
+                            ) : (
+                              <Badge variant="warning">Draft</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {docs.length === 0 && (
+                      <div className="text-xs text-zinc-400 text-center py-3">
+                        Chưa có SOP
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
-              {docs.length === 0 && (
-                <div className="text-xs text-zinc-400 text-center py-3">
-                  Chưa có SOP cho phòng ban này
-                </div>
-              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="lg:col-span-4 space-y-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">SOP phổ biến</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProgressList
+                rows={sops.map((s) => ({
+                  label: s.title,
+                  value: 75 + Math.round(Math.random() * 25),
+                  max: 100,
+                  right: `${75 + Math.round(Math.random() * 25)} lượt xem`,
+                  color: "#6366f1",
+                }))}
+              />
             </CardContent>
           </Card>
-        ))}
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Compliance</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <StatChip label="SOP đã acknowledge" value="84%" tone="success" />
+              <StatChip label="Chưa acknowledge" value="16%" tone="warning" />
+              <StatChip label="Cần cập nhật (>6 tháng)" value="2 SOP" tone="warning" />
+              <StatChip label="Retention policy" value="Active" tone="info" />
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Quick checklist</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            {[
+              { name: "Onboarding nhân sự mới", count: "12 items" },
+              { name: "Qualify lead", count: "6 items" },
+              { name: "Close đơn B2B", count: "9 items" },
+              { name: "Xử lý khiếu nại", count: "7 items" },
+              { name: "Chấm công cuối tháng", count: "4 items" },
+              { name: "Chạy payroll", count: "11 items" },
+            ].map((c) => (
+              <div key={c.name} className="flex items-center justify-between rounded-lg border border-zinc-100 p-3">
+                <div className="flex items-center gap-2">
+                  <CheckSquare className="h-4 w-4 text-indigo-600" />
+                  <span className="text-zinc-700">{c.name}</span>
+                </div>
+                <Badge variant="outline">{c.count}</Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
