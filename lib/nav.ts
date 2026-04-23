@@ -18,6 +18,7 @@ import {
   UserPlus,
   BookOpen,
   UserCircle,
+  HelpCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -47,4 +48,5 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/knowledge", label: "SOP / Playbook", icon: BookOpen },
   { href: "/profile", label: "Tài khoản", icon: UserCircle },
   { href: "/settings", label: "Cài đặt", icon: Settings },
+  { href: "/guide", label: "Hướng dẫn", icon: HelpCircle },
 ];

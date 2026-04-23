@@ -1,5 +1,4 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { MiniSpark } from "@/components/charts/MiniSpark";
 import { cn } from "@/lib/utils";
 
@@ -40,56 +39,64 @@ export function KpiCard({
   accent?: Accent;
   hint?: string;
   icon?: React.ReactNode;
-  /** Array of numbers for mini sparkline under the KPI. */
   spark?: number[];
 }) {
   const positive = typeof delta === "number" && delta >= 0;
   const color = ACCENT_HEX[accent];
 
   return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 whitespace-nowrap">
-            {icon && (
-              <span className={cn("h-6 w-6 rounded-md flex items-center justify-center", ACCENT_BG[accent])}>
-                {icon}
-              </span>
-            )}
-            <span className="truncate">{label}</span>
-          </div>
-          <div className="mt-1.5 text-2xl font-bold tracking-tight text-zinc-900 whitespace-nowrap">
-            {value}
-          </div>
-          {hint && <div className="text-xs text-zinc-400 mt-0.5 truncate">{hint}</div>}
+    <div
+      className={cn(
+        "rounded-xl bg-white px-4 py-3.5",
+        "shadow-[0_1px_2px_rgba(16,24,40,0.06),0_1px_3px_rgba(16,24,40,0.04)]",
+        "ring-1 ring-zinc-100",
+      )}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wide whitespace-nowrap overflow-hidden">
+          {icon && (
+            <span
+              className={cn(
+                "h-5 w-5 rounded-md flex items-center justify-center shrink-0",
+                ACCENT_BG[accent],
+              )}
+            >
+              {icon}
+            </span>
+          )}
+          <span className="truncate normal-case tracking-normal">{label}</span>
         </div>
         {typeof delta === "number" && (
           <span
             className={cn(
-              "shrink-0 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
+              "shrink-0 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
               positive ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700",
             )}
           >
-            {positive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+            {positive ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
             {Math.abs(delta).toFixed(1)}%
           </span>
         )}
       </div>
+      <div className="mt-1 text-[22px] leading-7 font-bold tracking-tight text-zinc-900 whitespace-nowrap truncate">
+        {value}
+      </div>
+      {hint && <div className="text-[11px] text-zinc-400 truncate mt-0.5">{hint}</div>}
       {spark && spark.length > 1 ? (
-        <div className="mt-2 -mx-1">
-          <MiniSpark data={spark} color={color} height={36} />
+        <div className="-mx-1 mt-1">
+          <MiniSpark data={spark} color={color} height={28} />
         </div>
       ) : (
-        <div className="mt-3 h-1 w-full rounded-full bg-zinc-100">
+        <div className="mt-2 h-[3px] w-full rounded-full bg-zinc-100 overflow-hidden">
           <div
-            className="h-1 rounded-full"
+            className="h-full rounded-full"
             style={{
-              width: `${Math.min(100, Math.max(10, (delta ?? 50) + 50))}%`,
+              width: `${Math.min(100, Math.max(20, (delta ?? 40) + 50))}%`,
               background: color,
             }}
           />
         </div>
       )}
-    </Card>
+    </div>
   );
 }

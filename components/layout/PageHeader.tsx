@@ -12,10 +12,10 @@ export function PageHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-start justify-between gap-4 mb-6", className)}>
+    <div className={cn("flex items-end justify-between gap-4 mb-4", className)}>
       <div>
-        <h1 className="text-2xl font-bold text-zinc-900">{title}</h1>
-        {description && <p className="text-sm text-zinc-500 mt-1">{description}</p>}
+        <h1 className="text-xl font-bold tracking-tight text-zinc-900">{title}</h1>
+        {description && <p className="text-[12px] text-zinc-500 mt-0.5">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>

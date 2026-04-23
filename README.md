@@ -3,6 +3,8 @@
 > 🟣 Hệ thống quản trị công ty: **Task → KPI cá nhân → KPI phòng ban → KPI công ty → Tài chính**
 >
 > **Live demo:** [bizos-company-os.vercel.app](https://bizos-company-os.vercel.app) · tất cả trang chạy ở Demo mode ngay cả khi chưa cấu hình Supabase.
+>
+> 📘 **Hướng dẫn sử dụng đầy đủ:** [/guide](https://bizos-company-os.vercel.app/guide) — 19 trang, 3 workflow end-to-end, tips.
 
 by [**Alex Le**](mailto:alexle@titanlabs.vn) · `alexle@titanlabs.vn`
 Donate: [PayPal — sai211dn@gmail.com](https://www.paypal.com/paypalme/sai211dn)
@@ -77,6 +79,40 @@ Mỗi bước đều truy vết được. Đổi 1 KPI lá ở **Forecast** sẽ
 - **Supabase** (Postgres · Auth · Storage · RLS) qua `@supabase/ssr`
 - React Hook Form + Zod · TanStack Table
 - Deploy: **Vercel** hoặc **Railway** (Dockerfile), Supabase managed cloud
+
+## 📖 Hướng dẫn sử dụng nhanh
+
+### Cho CEO / Founder
+
+1. Mở **[/dashboard](https://bizos-company-os.vercel.app/dashboard)** mỗi sáng — 30 giây hiểu công ty đang như thế nào.
+2. KPI đỏ trên **[/kpi](https://bizos-company-os.vercel.app/kpi)** → click vào từng KPI xem ai owner + actual data source.
+3. Vào **[/forecast](https://bizos-company-os.vercel.app/forecast)** chạy what-if: _"Nếu Sales hụt 20% thì Net Profit còn bao nhiêu?"_
+4. **[/approvals](https://bizos-company-os.vercel.app/approvals)** duyệt bonus / ngân sách / tuyển dụng.
+
+### Cho HR Admin
+
+1. **[/people](https://bizos-company-os.vercel.app/people)** quản lý directory nhân sự.
+2. **[/compensation](https://bizos-company-os.vercel.app/compensation)** chạy payroll, xem Incentive Simulator.
+3. **[/recruiting](https://bizos-company-os.vercel.app/recruiting)** theo dõi pipeline ứng viên + skill gap.
+
+### Cho Department Head
+
+1. **[/departments/:id](https://bizos-company-os.vercel.app/departments)** xem KPI phòng + task + ngân sách.
+2. **[/operations](https://bizos-company-os.vercel.app/operations)** giao task, gắn `linked_kpi_id`.
+3. **[/okr](https://bizos-company-os.vercel.app/okr)** cascade mục tiêu quý xuống team.
+
+### Quy trình end-to-end
+
+```
+Task (/operations) → KPI cá nhân (/people/:id)
+  → KPI phòng ban (/departments/:id)
+    → KPI công ty (/kpi)
+      → Payroll (/compensation, chạy rule engine)
+        → Tài chính (/finance: P&L · BS · CF)
+          → Forecast what-if (/forecast)
+```
+
+➡️ **Xem chi tiết từng màn hình + 3 workflow đầy đủ tại [/guide](https://bizos-company-os.vercel.app/guide).**
 
 ## 🚀 Chạy local
 

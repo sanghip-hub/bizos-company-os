@@ -11,8 +11,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-zinc-50 flex flex-col">
       <Sidebar />
       <Topbar userEmail={user?.email ?? "demo@bizos.local"} />
-      <main className="md:ml-60 p-6 flex-1">{children}</main>
-      <div className="md:ml-60">
+      <main className="md:ml-56 px-5 py-4 flex-1">{children}</main>
+      <div className="md:ml-56">
         <Footer />
       </div>
     </div>
